@@ -4,6 +4,7 @@ from ..db import db
 
 books_bp = Blueprint("books_bp", __name__, url_prefix="/books")
 
+# READ ALL BOOK RECORDS
 @books_bp.get("")
 def get_all_books():
 
@@ -23,6 +24,7 @@ def get_all_books():
         )
     return books_response
 
+# READ A BOOK RECORD
 @books_bp.get("/<book_id>")
 def get_one_book(book_id):
 
@@ -34,8 +36,10 @@ def get_one_book(book_id):
         "description": book.description,
     }
 
+# CREATE A BOOK RECORD
 @books_bp.post("")
 def create_book():
+
     request_body = request.get_json()
     title = request_body["title"]
     description = request_body["description"]
@@ -51,6 +55,7 @@ def create_book():
     }
     return response, 201
 
+# UPDATE A BOOK RECORD
 @books_bp.put("/<book_id>")
 def update_book(book_id):
 
@@ -63,7 +68,19 @@ def update_book(book_id):
 
     return Response(status=204, mimetype="application/json")
 
+# DELETE A BOOK RECORD
+@books_bp.delete("/<book_id>")
+def delete_book(book_id):
+
+    book = validate_book(book_id)
+    db.session.delete(book)
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
+
+# HELPER FUNCTION FOR ERROR HANDLING
 def validate_book(book_id):
+
     try:
         book_id = int(book_id)
     except:
