@@ -4,11 +4,40 @@ from ..db import db
 
 books_bp = Blueprint("books_bp", __name__, url_prefix="/books")
 
+# CREATE A BOOK RECORD
+@books_bp.post("")
+def create_book():
+
+    request_body = request.get_json()
+    title = request_body["title"]
+    description = request_body["description"]
+
+    new_book = Book(title=title, description=description)
+    db.session.add(new_book)
+    db.session.commit()
+
+    response = {
+        "id": new_book.id,
+        "title": new_book.title,
+        "description": new_book.description,
+    }
+    return response, 201
+
 # READ ALL BOOK RECORDS
 @books_bp.get("")
 def get_all_books():
 
-    query = db.select(Book).order_by(Book.id)
+    query = db.select(Book)
+
+    title_param = request.args.get("title")
+    if title_param:
+        query = query.where(Book.title.ilike(f"%{title_param}%"))
+
+    description_param = request.args.get("description")
+    if description_param:
+        query = query.where(Book.description.ilike(f"%{description_param}%"))
+
+    query = query.order_by(Book.id)
     books = db.session.scalars(query)
     # We could also write the line above as:
     # books = db.session.execute(query).scalars()
@@ -35,25 +64,6 @@ def get_one_book(book_id):
         "title": book.title,
         "description": book.description,
     }
-
-# CREATE A BOOK RECORD
-@books_bp.post("")
-def create_book():
-
-    request_body = request.get_json()
-    title = request_body["title"]
-    description = request_body["description"]
-
-    new_book = Book(title=title, description=description)
-    db.session.add(new_book)
-    db.session.commit()
-
-    response = {
-        "id": new_book.id,
-        "title": new_book.title,
-        "description": new_book.description,
-    }
-    return response, 201
 
 # UPDATE A BOOK RECORD
 @books_bp.put("/<book_id>")
