@@ -16,8 +16,12 @@ class Book(db.Model):
 
     @classmethod
     def from_dict(cls, book_data):
-        new_book = Book(title=book_data["title"],
-                        description=book_data["description"])
+        # Use get() to fetch values that could be undefined to avoid raising an error
+        author_id = book_data.get("author_id")
+
+        new_book = cls(title=book_data["title"],
+                        description=book_data["description"],
+                        author_id=author_id)
         return new_book
 
     def to_dict(self):
@@ -25,5 +29,8 @@ class Book(db.Model):
         book_as_dict["id"] = self.id
         book_as_dict["title"] = self.title
         book_as_dict["description"] = self.description
+
+        if self.author:
+            book_as_dict["author"] = self.author.name
 
         return book_as_dict
