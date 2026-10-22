@@ -32,4 +32,3 @@ def get_books_by_author(author_id):
     author = validate_model(Author, author_id)
     response = [book.to_dict() for book in author.books]
     return response
-
