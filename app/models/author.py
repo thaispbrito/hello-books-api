@@ -20,3 +20,4 @@ class Author(db.Model):
             "id": self.id,
             "name": self.name
         }
+        return author_as_dict
